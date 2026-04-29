@@ -11,7 +11,7 @@ Um das System auf einem frischen Gerät zu installieren, lade den Installer und 
 ```bash
 chmod +x setup_sovereign.sh
 ./setup_sovereign.sh
-
+Die Installation kann bis zu ca 10 min dauern. Metasploit braucht in der userland Umgebung sehr lange! Im scan bleibt das Programm nicht stehen. Es sieht nur so aus weil der Agent die Metasploit Console öffnet! 
 ```
 ### 🚨 Der "Requests" & Python-Fix (WICHTIG)
 Auf modernen Debian-Systemen (UserLAnd) schützt Python die Systemumgebung. Falls der Fehler ModuleNotFoundError: No module named 'requests' auftritt, löst dieser Befehl das Problem sofort:
