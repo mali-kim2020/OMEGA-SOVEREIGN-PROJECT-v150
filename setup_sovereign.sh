@@ -12,7 +12,6 @@ RESET='\033[0m'
 echo -e "${BLUE}[*] Starte PROJECT OMEGA SOVEREIGN Full-Installation mit Ghost-Routing...${RESET}"
 
 # 1. System-Basis, Nikto, Python & TOR GHOST-NETZWERK
-# FIX: 'procps' hinzugefügt (für pgrep) und getrennte proxychains Installation
 echo -e "${BLUE}[1/6] Installiere System-Tools, Nikto, Tor & Proxychains...${RESET}"
 sudo apt update -y
 
@@ -70,7 +69,6 @@ cat << 'EOF' > pentest
 #!/bin/bash
 echo -e "\033[94m[*] Initialisiere Ghost-Routing (Tor-Netzwerk)...\033[0m"
 
-# FIX: 2>&1 unterdrückt Fehlermeldungen komplett, falls pgrep nicht existiert
 if ! pgrep -x "tor" > /dev/null 2>&1; then
     tor > /dev/null 2>&1 &
     echo -e "\033[90m[*] Verbinde mit Tor-Knoten (bitte ca. 5 Sekunden warten)...\033[0m"
@@ -80,7 +78,6 @@ fi
 echo -e "\033[92m[+] Tor-Tunnel etabliert! Dein echter Standort ist nun verborgen.\033[0m"
 export TOR_ROUTING=1
 
-# FIX: Harter Check, welches Proxychains von apt installiert wurde
 if command -v proxychains4 &> /dev/null; then
     proxychains4 -q python3 autonomous_agent.py
 elif command -v proxychains &> /dev/null; then
