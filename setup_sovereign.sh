@@ -12,10 +12,10 @@ RESET='\033[0m'
 echo -e "${BLUE}[*] Starte PROJECT OMEGA SOVEREIGN Full-Installation mit Ghost-Routing...${RESET}"
 
 # 1. System-Basis, Nikto, Python & TOR GHOST-NETZWERK
+# FIX: 'procps' hinzugefügt (für pgrep) und getrennte proxychains Installation
 echo -e "${BLUE}[1/6] Installiere System-Tools, Nikto, Tor & Proxychains...${RESET}"
 sudo apt update -y
 
-# FIX: Getrennte Installation! Wenn ein Paket auf UserLAnd fehlt, bricht apt sonst alles ab.
 sudo apt install -y python3 python3-pip python3-requests python3-urllib3 \
                      git unzip curl wget sqlite3 nikto build-essential tor procps
 
