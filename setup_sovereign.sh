@@ -11,11 +11,12 @@ RESET='\033[0m'
 
 echo -e "${BLUE}[*] Starte PROJECT OMEGA SOVEREIGN Full-Installation mit Ghost-Routing...${RESET}"
 
+# FIX: 'netcat-openbsd' hinzugefügt, um den Tor-Port professionell zu überwachen
 echo -e "${BLUE}[1/6] Installiere System-Tools, Nikto, Tor & Proxychains...${RESET}"
 sudo apt update -y
 
 sudo apt install -y python3 python3-pip python3-requests python3-urllib3 \
-                     git unzip curl wget sqlite3 nikto build-essential tor procps
+                     git unzip curl wget sqlite3 nikto build-essential tor procps netcat-openbsd
 
 sudo apt install -y proxychains4 || sudo apt install -y proxychains
 
@@ -61,14 +62,29 @@ cat << 'EOF' > pentest
 #!/bin/bash
 echo -e "\033[94m[*] Initialisiere Ghost-Routing (Tor-Netzwerk)...\033[0m"
 
-if ! pgrep -x "tor" > /dev/null 2>&1; then
+# FIX: Intelligente Schleife. Startet Tor und wartet exakt, bis Port 9050 OFFEN ist.
+if ! nc -z 127.0.0.1 9050 2>/dev/null; then
+    echo -e "\033[90m[*] Starte Tor-Daemon im Hintergrund...\033[0m"
     tor > /dev/null 2>&1 &
-    # FIX: Wartezeit auf 15 Sekunden erhöht, damit Tor den globalen Tunnel sicher aufbauen kann!
-    echo -e "\033[90m[*] Verbinde mit Tor-Knoten (bitte ca. 15 Sekunden warten, Darknet baut auf)...\033[0m"
-    sleep 15
+    
+    echo -n -e "\033[90m[*] Warte auf Tor-Tunnel (Ping Port 9050)"
+    for i in {1..30}; do
+        if nc -z 127.0.0.1 9050 2>/dev/null; then
+            echo -e "\n\033[92m[+] Tor-Tunnel erfolgreich etabliert! Dein Standort ist verborgen.\033[0m"
+            break
+        fi
+        echo -n "."
+        sleep 1
+    done
+    
+    if ! nc -z 127.0.0.1 9050 2>/dev/null; then
+        echo -e "\n\033[91m[!] FEHLER: Tor konnte nicht starten. Port 9050 blockiert. Abbruch!\033[0m"
+        exit 1
+    fi
+else
+    echo -e "\033[92m[+] Tor-Tunnel läuft bereits!\033[0m"
 fi
 
-echo -e "\033[92m[+] Tor-Tunnel etabliert! Dein echter Standort ist nun verborgen.\033[0m"
 export TOR_ROUTING=1
 
 if command -v proxychains4 &> /dev/null; then
@@ -77,7 +93,6 @@ elif command -v proxychains &> /dev/null; then
     proxychains -q python3 autonomous_agent.py
 else
     echo -e "\033[91m[!] FEHLER: Proxychains nicht gefunden.\033[0m"
-    echo -e "\033[93mBitte führe './setup_sovereign.sh' noch einmal aus!\033[0m"
     exit 1
 fi
 EOF
